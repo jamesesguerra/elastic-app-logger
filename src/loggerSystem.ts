@@ -19,6 +19,9 @@ export default class LoggerSystem {
       return clone;
     });
 
-    return new CompositeLogger(clones);
+    const compositeLogger = new CompositeLogger(clones);
+    compositeLogger.setLogLevel(this.level);
+
+    return compositeLogger;
   }
 }

@@ -82,7 +82,11 @@ abstract class BaseLogger {
 
   protected abstract sendError(error: string | Error, properties: any): void;
 
-  public abstract clone(options?: LoggerOptions): this;
+  public clone<T extends this>(options?: LoggerOptions): T {
+    const ctor = this.constructor as { new (opts?: LoggerOptions): T };
+    const cloned = new ctor(options);
+    return this.copyBaseProps(cloned);
+  }
 }
 
 class CompositeLogger extends BaseLogger {
@@ -96,10 +100,6 @@ class CompositeLogger extends BaseLogger {
 
   protected sendError(err: string | Error, props: any) {
     this.sinks.forEach((s) => s.dispatch("error", err, props));
-  }
-
-  clone(): this {
-    return new CompositeLogger(this.sinks.map((s) => s.clone())) as this;
   }
 }
 

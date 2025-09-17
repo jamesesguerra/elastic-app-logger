@@ -25,8 +25,4 @@ export class ConsoleLogger extends BaseLogger {
     const hasProps = Object.keys(properties || {}).length > 0;
     hasProps ? console.error(err, properties) : console.error(err);
   }
-
-  public clone(options?: LoggerOptions): this {
-    return this.copyBaseProps(new ConsoleLogger(options)) as this;
-  }
 }
