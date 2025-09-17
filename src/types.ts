@@ -21,3 +21,20 @@ export type MinimumLevelAPI = {
   warn: () => LoggerConfiguration;
   error: () => LoggerConfiguration;
 };
+
+export interface InitApmOptions {
+  serviceName: string;
+  serverUrl: string;
+  environment?: string;
+  active?: boolean;
+  logLevel?: LogLevel;
+  [key: string]: any;
+}
+
+export interface InitElasticOptions {
+  indexName: string;
+  serverUrl: string;
+  environment?: string;
+  logLevel?: LogLevel;
+  [key: string]: any;
+}

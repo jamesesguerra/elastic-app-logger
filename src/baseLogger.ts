@@ -1,4 +1,5 @@
 import { Enricher, LoggerOptions, LOG_LEVEL_PRIORITY } from "./types";
+import { formatMessage } from "./formatter";
 
 abstract class BaseLogger {
   protected componentName?: string;
@@ -23,11 +24,16 @@ abstract class BaseLogger {
     return this;
   }
 
-  public dispatch(level: LogLevel, message: string | Error, properties: any) {
-    if (level === "error") {
-      this.sendError(message, properties);
+  public dispatch(
+    level: LogLevel,
+    logValue: string | Error | undefined,
+    message: string,
+    properties: any
+  ) {
+    if (level === "error" && logValue instanceof Error) {
+      this.sendError(logValue, message, properties);
     } else {
-      this.sendLog(level, String(message), properties);
+      this.sendLog(level, message, properties);
     }
   }
 
@@ -35,36 +41,49 @@ abstract class BaseLogger {
     return LOG_LEVEL_PRIORITY[level] >= LOG_LEVEL_PRIORITY[this.level];
   }
 
-  protected log(level: LogLevel, message: string | Error, properties?: any) {
+  protected log(level: LogLevel, logValue: any, ...args: any[]) {
     if (!this.shouldLog(level)) return;
 
-    const hasProps = properties !== undefined;
+    let error: Error | undefined;
+    let template: string;
+    let values: any[];
 
-    if (level === "error") {
-      this.sendError(message, hasProps ? properties : {});
+    if (logValue instanceof Error) {
+      error = logValue;
+      template = args.shift() ?? error.message;
+      values = args;
     } else {
-      this.sendLog(level, String(message), hasProps ? properties : {});
+      template = logValue;
+      values = args;
+    }
+
+    const { message, props } = formatMessage(template, values);
+
+    if (error) {
+      this.sendError(error, message, { ...props });
+    } else {
+      this.sendLog(level, message, { ...props });
     }
   }
 
-  trace(message: string, properties?: any) {
-    this.log("trace", message, properties);
+  trace(...args: [any, ...any[]]): void {
+    this.log("trace", ...args);
   }
 
-  debug(message: string, properties?: any) {
-    this.log("debug", message, properties);
+  debug(...args: [any, ...any[]]): void {
+    this.log("debug", ...args);
   }
 
-  info(message: string, properties?: any) {
-    this.log("info", message, properties);
+  info(...args: [any, ...any[]]): void {
+    this.log("info", ...args);
   }
 
-  warn(message: string, properties?: any) {
-    this.log("warn", message, properties);
+  warn(...args: [any, ...any[]]): void {
+    this.log("warn", ...args);
   }
 
-  error(err: string | Error, properties?: any) {
-    this.log("error", err, properties);
+  error(...args: [any, ...any[]]): void {
+    this.log("error", ...args);
   }
 
   protected copyBaseProps<T extends BaseLogger>(target: T): T {
@@ -80,7 +99,11 @@ abstract class BaseLogger {
     properties: any
   ): void;
 
-  protected abstract sendError(error: string | Error, properties: any): void;
+  protected abstract sendError(
+    error: string | Error,
+    message: string,
+    properties: any
+  ): void;
 
   public clone<T extends this>(options?: LoggerOptions): T {
     const ctor = this.constructor as { new (opts?: LoggerOptions): T };
@@ -89,18 +112,18 @@ abstract class BaseLogger {
   }
 }
 
-class CompositeLogger extends BaseLogger {
+class DispatchLogger extends BaseLogger {
   constructor(private sinks: BaseLogger[]) {
     super();
   }
 
   protected sendLog(level: LogLevel, message: string, props: any) {
-    this.sinks.forEach((s) => s.dispatch(level, message, props));
+    this.sinks.forEach((s) => s.dispatch(level, undefined, message, props));
   }
 
-  protected sendError(err: string | Error, props: any) {
-    this.sinks.forEach((s) => s.dispatch("error", err, props));
+  protected sendError(err: Error, message: string, props: any) {
+    this.sinks.forEach((s) => s.dispatch("error", err, message, props));
   }
 }
 
-export { BaseLogger, CompositeLogger };
+export { BaseLogger, DispatchLogger };

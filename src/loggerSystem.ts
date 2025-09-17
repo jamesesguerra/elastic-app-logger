@@ -1,6 +1,6 @@
 import { BaseLogger } from "./baseLogger";
 import { Enricher } from "./types";
-import { CompositeLogger } from "./baseLogger";
+import { DispatchLogger } from "./baseLogger";
 
 export default class LoggerSystem {
   constructor(
@@ -19,9 +19,9 @@ export default class LoggerSystem {
       return clone;
     });
 
-    const compositeLogger = new CompositeLogger(clones);
-    compositeLogger.setLogLevel(this.level);
+    const dispatchLogger = new DispatchLogger(clones);
+    dispatchLogger.setLogLevel(this.level);
 
-    return compositeLogger;
+    return dispatchLogger;
   }
 }
