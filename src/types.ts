@@ -22,12 +22,9 @@ export type MinimumLevelAPI = {
   error: () => LoggerConfiguration;
 };
 
-export interface InitApmOptions {
+export interface InitElasticApmOptions {
   serviceName: string;
   serverUrl: string;
-  environment?: string;
-  active?: boolean;
-  logLevel?: LogLevel;
   [key: string]: any;
 }
 

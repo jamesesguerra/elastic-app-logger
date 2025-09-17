@@ -1,5 +1,5 @@
 import { BaseLogger } from "./baseLogger";
-import { LoggerOptions } from "./types";
+import { InitElasticApmOptions, LoggerOptions } from "./types";
 
 export class ConsoleLogger extends BaseLogger {
   protected sendLog(level: LogLevel, message: string, properties: any) {
@@ -24,5 +24,19 @@ export class ConsoleLogger extends BaseLogger {
   protected sendError(err: string | Error, properties: any) {
     const hasProps = Object.keys(properties || {}).length > 0;
     hasProps ? console.error(err, properties) : console.error(err);
+  }
+}
+
+export class ElasticApmLogger extends BaseLogger {
+  constructor(private options: InitElasticApmOptions) {
+    super();
+  }
+
+  protected sendLog(level: LogLevel, message: string, properties: any): void {
+    throw new Error("Method not implemented.");
+  }
+
+  protected sendError(error: string | Error, message: string, properties: any): void {
+    throw new Error("Method not implemented.");
   }
 }
