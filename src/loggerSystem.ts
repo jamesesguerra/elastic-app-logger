@@ -5,7 +5,7 @@ import { DispatchLogger } from "./baseLogger";
 export default class LoggerSystem {
   constructor(
     private level: LogLevel,
-    private environment: string | undefined,
+    private environment: string,
     private enrichers: Enricher[],
     private sinks: BaseLogger[]
   ) {}
@@ -14,7 +14,7 @@ export default class LoggerSystem {
     const clones = this.sinks.map(s => {
       const clone = s.clone({ componentName });
       clone.setLogLevel(this.level);
-      if (this.environment) clone.setEnvironment(this.environment);
+      clone.setEnvironment(this.environment);
       this.enrichers.forEach(e => clone.setEnricher(e));
       return clone;
     });

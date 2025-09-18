@@ -1,18 +1,18 @@
-import LogLevel from "@elastic/apm-rum";
 import { BaseLogger } from "./baseLogger";
 import LoggerSystem from "./loggerSystem";
-import { ConsoleLogger, ElasticApmLogger } from "./customLoggers";
-import { InitElasticApmOptions, MinimumLevelAPI } from "./types";
+import { ConsoleLogger, ElasticApiLogger, ElasticApmLogger } from "./customLoggers";
+import { ElasticApiConfig, MinimumLevel, UserContext } from "./types";
+import { setApmUserContext } from "./elastic";
 
 type Enricher = (meta: Record<string, any>) => Record<string, any>;
 
 export default class LoggerConfiguration {
   private enrichers: Enricher[] = [];
   private level: LogLevel = "info";
-  private environment?: string;
+  private environment: string = "development";
   private sinks: BaseLogger[] = [];
 
-  get minimumLevel(): MinimumLevelAPI {
+  get minimumLevel(): MinimumLevel {
     return {
       trace: () => this.setLogLevel("trace"),
       debug: () => this.setLogLevel("debug"),
@@ -62,6 +62,11 @@ export default class LoggerConfiguration {
     return this.withEnricher((_) => ({ appVersion: version }));
   }
 
+  withUserContext(user: UserContext) {
+    setApmUserContext(user);
+    return this;
+  }
+
   // withtimezone
 
   // convenience appenders
@@ -75,8 +80,13 @@ export default class LoggerConfiguration {
     return this;
   }
 
-  writeToElasticApm(options: InitElasticApmOptions) {
-    this.sinks.push(new ElasticApmLogger(options));
+  writeToElasticApm() {
+    this.sinks.push(new ElasticApmLogger());
+    return this;
+  }
+
+  writeToElasticApi(config: ElasticApiConfig) {
+    this.sinks.push(new ElasticApiLogger(config));
     return this;
   }
 

@@ -20,5 +20,14 @@ export function formatMessage(template: string, args: any[]) {
     }
   });
 
+  for (; argIndex < args.length; argIndex++) {
+    const extra = args[argIndex];
+    if (extra && typeof extra === "object" && !Array.isArray(extra)) {
+      Object.assign(props, extra);
+    } else {
+      props[`arg${argIndex}`] = extra;
+    }
+  }
+
   return { message, props };
 }

@@ -24,6 +24,13 @@ abstract class BaseLogger {
     return this;
   }
 
+  protected applyEnrichers(properties: any = {}) {
+    return this.enrichers.reduce(
+      (acc, fn) => ({ ...acc, ...fn(acc) }),
+      properties
+    );
+  }
+
   public dispatch(
     level: LogLevel,
     logValue: string | Error | undefined,
@@ -66,24 +73,34 @@ abstract class BaseLogger {
     }
   }
 
-  trace(...args: [any, ...any[]]): void {
-    this.log("trace", ...args);
+  trace(message: string, ...args: any[]): void {
+    this.log("trace", message, ...args);
   }
 
-  debug(...args: [any, ...any[]]): void {
-    this.log("debug", ...args);
+  debug(message: string, ...args: any[]): void {
+    this.log("debug", message, ...args);
   }
 
-  info(...args: [any, ...any[]]): void {
-    this.log("info", ...args);
+  info(message: string, ...args: any[]): void {
+    this.log("info", message, ...args);
   }
 
-  warn(...args: [any, ...any[]]): void {
-    this.log("warn", ...args);
+  warn(message: string, ...args: any[]): void {
+    this.log("warn", message, ...args);
   }
 
+  error(error: Error, message: string, ...args: any[]): void;
+  error(message: string, ...args: any[]): void;
   error(...args: [any, ...any[]]): void {
-    this.log("error", ...args);
+    if (args[0] instanceof Error) {
+      const [err, message, ...rest] = args;
+      this.log("error", err, message, ...rest);
+    } else if (typeof args[0] === "string") {
+      const [message, ...rest] = args;
+      this.log("error", message, ...rest);
+    } else {
+      this.log("error", "Invalid error log input", { input: args[0] });
+    }
   }
 
   protected copyBaseProps<T extends BaseLogger>(target: T): T {
@@ -105,9 +122,9 @@ abstract class BaseLogger {
     properties: any
   ): void;
 
-  public clone<T extends this>(options?: LoggerOptions): T {
-    const ctor = this.constructor as { new (opts?: LoggerOptions): T };
-    const cloned = new ctor(options);
+  public clone(options?: LoggerOptions): this {
+    const ctor = this.constructor as { new (opts?: LoggerOptions): any };
+    const cloned = new ctor(options) as this;
     return this.copyBaseProps(cloned);
   }
 }

@@ -14,7 +14,7 @@ export const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
   error: 5,
 };
 
-export type MinimumLevelAPI = {
+export type MinimumLevel = {
   trace: () => LoggerConfiguration;
   debug: () => LoggerConfiguration;
   info: () => LoggerConfiguration;
@@ -22,16 +22,21 @@ export type MinimumLevelAPI = {
   error: () => LoggerConfiguration;
 };
 
-export interface InitElasticApmOptions {
-  serviceName: string;
+export interface ElasticApiConfig {
+  indexName: string;
   serverUrl: string;
   [key: string]: any;
 }
 
-export interface InitElasticOptions {
-  indexName: string;
-  serverUrl: string;
-  environment?: string;
-  logLevel?: LogLevel;
+export interface UserContext {
+  id: string | number;
+  username: string;
+  email?: string | undefined;
   [key: string]: any;
 }
+
+export interface IEnrichedLogger {
+  addEnrichments(properties: any): void;
+}
+
+export type ElasticApiLoggerOptions = LoggerOptions & { config: ElasticApiConfig };
