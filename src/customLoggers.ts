@@ -4,21 +4,37 @@ import { ElasticApiConfig, ElasticApiLoggerOptions, IEnrichedLogger, LoggerOptio
 import serializer from "./serializer";
 
 class ConsoleLogger extends BaseLogger {
+  private static colors: Record<LogLevel, string> = {
+    trace: "\x1b[90m", // gray
+    debug: "\x1b[32m",  // green
+    info: "\x1b[36m", // cyan
+    warn: "\x1b[33m",  // yellow
+    error: "\x1b[31m", // red
+  };
+
+  private format(level: LogLevel, message: string): string {
+    const color = ConsoleLogger.colors[level];
+    return `${color}[${level.toUpperCase()}]${ConsoleLogger.reset} ${message}`;
+  }
+
+  private static reset = "\x1b[0m";
+
   protected sendLog(level: LogLevel, message: string, properties: any) {
+    const formatted = this.format(level, message);
     const hasProps = Object.keys(properties || {}).length > 0;
 
     switch (level) {
       case "trace":
-        hasProps ? console.trace(message, properties) : console.trace(message);
+        hasProps ? console.trace(formatted, properties) : console.trace(formatted);
         break;
       case "debug":
-        hasProps ? console.debug(message, properties) : console.debug(message);
+        hasProps ? console.debug(formatted, properties) : console.debug(formatted);
         break;
       case "info":
-        hasProps ? console.info(message, properties) : console.info(message);
+        hasProps ? console.info(formatted, properties) : console.info(formatted);
         break;
       case "warn":
-        hasProps ? console.warn(message, properties) : console.warn(message);
+        hasProps ? console.warn(formatted, properties) : console.warn(formatted);
         break;
     }
   }

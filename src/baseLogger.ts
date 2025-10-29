@@ -1,4 +1,4 @@
-import { Enricher, LoggerOptions, LOG_LEVEL_PRIORITY } from "./types";
+import { Enricher, LoggerOptions, LOG_LEVEL_PRIORITY, LogEventLevel } from "./types";
 import { formatMessage } from "./formatter";
 
 abstract class BaseLogger {
@@ -46,6 +46,10 @@ abstract class BaseLogger {
 
   protected shouldLog(level: LogLevel) {
     return LOG_LEVEL_PRIORITY[level] >= LOG_LEVEL_PRIORITY[this.level];
+  }
+
+  public isEnabled(level: LogEventLevel): boolean {
+    return this.shouldLog(level as unknown as LogLevel);
   }
 
   protected log(level: LogLevel, logValue: any, ...args: any[]) {

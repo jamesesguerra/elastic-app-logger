@@ -14,6 +14,14 @@ export const LOG_LEVEL_PRIORITY: Record<LogLevel, number> = {
   error: 5,
 };
 
+export enum LogEventLevel {
+  Trace = "trace",
+  Debug = "debug",
+  Information = "info",
+  Warning = "warn",
+  Error = "error",
+}
+
 export type MinimumLevel = {
   trace: () => LoggerConfiguration;
   debug: () => LoggerConfiguration;
